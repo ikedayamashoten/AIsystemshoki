@@ -1,8 +1,8 @@
 {
   "rewrites": [
-    { "source": "/",         "destination": "/teacher.html" },
-    { "source": "/teacher",  "destination": "/teacher.html" },
-    { "source": "/student",  "destination": "/student.html" },
-    { "source": "/admin",    "destination": "/admin.html"   }
+    { "source": "/",        "destination": "/teachershoki.html" },
+    { "source": "/teacher", "destination": "/teachershoki.html" },
+    { "source": "/student", "destination": "/studentshoki.html" },
+    { "source": "/admin",   "destination": "/adminshoki.html"   }
   ]
 }
