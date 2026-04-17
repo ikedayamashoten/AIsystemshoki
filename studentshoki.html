@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>採点結果確認 | 池田山商店AI鐘馗</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --g:#1d6fb8;--g-dk:#155e9c;--g-lt:#eff6ff;--g-lt2:#dbeafe;
+      --blue:#0ea5e9;--blue-lt:#f0f9ff;--orange:#f59e0b;--purple:#8b5cf6;--red:#ef4444;
+      --ink:#1a1f2e;--ink-s:#4a5568;--ink-m:#94a3b8;
+      --bg:#f0f7f4;--white:#fff;--s2:#f8fafc;--s3:#f1f5f9;
+      --border:#e2e8f0;--shadow:0 2px 8px rgba(0,0,0,.07);--shadow-lg:0 8px 32px rgba(0,0,0,.12);
+      --r:14px;--r-sm:8px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--ink);line-height:1.65;min-height:100vh;}
+    /* SEARCH */
+    .search-screen{display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;
+      background:linear-gradient(160deg,#071428 0%,#0c2251 40%,#071428 100%);}
+    .s-wrap{width:100%;max-width:440px;}
+    .s-logo{text-align:center;margin-bottom:28px;}
+    .s-logo-mark{display:inline-flex;width:72px;height:72px;background:var(--g);border-radius:22px;
+      align-items:center;justify-content:center;font-size:34px;margin-bottom:12px;
+      box-shadow:0 0 0 10px rgba(29,111,184,.15),0 0 0 20px rgba(29,111,184,.07);}
+    .s-logo-txt{font-family:'DM Sans',sans-serif;color:rgba(255,255,255,.5);font-size:13px;letter-spacing:1px;}
+    .s-card{background:var(--white);border-radius:22px;padding:40px;box-shadow:var(--shadow-lg);}
+    .s-title{font-family:'DM Sans',sans-serif;font-size:22px;font-weight:700;color:var(--ink);margin-bottom:4px;}
+    .s-sub{font-size:13px;color:var(--ink-m);margin-bottom:28px;}
+    .field{margin-bottom:18px;}
+    .field label{display:block;font-size:12px;font-weight:700;color:var(--ink-s);margin-bottom:7px;text-transform:uppercase;letter-spacing:.5px;}
+    .field input{width:100%;padding:12px 16px;border:2px solid var(--border);border-radius:var(--r-sm);font-size:15px;font-family:inherit;outline:none;transition:border-color .2s;background:var(--s2);}
+    .field input:focus{border-color:var(--g);background:var(--white);box-shadow:0 0 0 3px rgba(29,111,184,.1);}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:12px 22px;border:none;border-radius:var(--r-sm);font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;transition:all .18s;}
+    .btn-primary{background:var(--g);color:white;}
+    .btn-primary:hover{background:var(--g-dk);transform:translateY(-1px);box-shadow:0 4px 12px rgba(29,111,184,.3);}
+    .btn-primary:disabled{background:var(--ink-m);transform:none;cursor:not-allowed;}
+    .btn-block{width:100%;padding:14px;font-size:16px;}
+    .btn-outline{background:transparent;color:var(--g);border:2px solid var(--g);}
+    .btn-outline:hover{background:var(--g-lt);}
+    .btn-sm{padding:7px 14px;font-size:13px;border-radius:8px;}
+    .err{display:none;font-size:13px;color:var(--red);text-align:center;margin-top:12px;}
+    .hint{font-size:12px;color:var(--ink-m);text-align:center;margin-top:14px;}
+    /* RESULT SCREEN */
+    .res-screen{display:none;min-height:100vh;}
+    .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10;box-shadow:var(--shadow);}
+    .topbar-title{font-family:'DM Sans',sans-serif;font-size:17px;font-weight:700;color:var(--g);flex:1;}
+    .school-pill{background:var(--g-lt);color:var(--g);padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1px solid var(--g-lt2);}
+    .main{max-width:860px;margin:0 auto;padding:28px 16px;}
+    /* PROFILE */
+    .profile{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow);padding:22px 24px;margin-bottom:22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+    .avatar{width:58px;height:58px;background:var(--g-lt);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;border:2px solid var(--g-lt2);}
+    .prof-info{flex:1;min-width:0;}
+    .prof-name{font-family:'DM Sans',sans-serif;font-size:20px;font-weight:700;color:var(--ink);}
+    .prof-meta{font-size:13px;color:var(--ink-m);margin-top:3px;}
+    .prof-stats{display:flex;gap:22px;flex-wrap:wrap;}
+    .pst{text-align:center;}
+    .pst-n{font-family:'DM Sans',sans-serif;font-size:26px;font-weight:700;color:var(--g);}
+    .pst-l{font-size:11px;color:var(--ink-m);text-transform:uppercase;letter-spacing:.5px;}
+    /* RESULT CARDS */
+    .res-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden;cursor:pointer;transition:box-shadow .2s,transform .15s;border-left:5px solid var(--g);}
+    .res-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-1px);}
+    .res-card.m-jte{border-left-color:var(--g);}
+    .res-card.m-etj{border-left-color:var(--blue);}
+    .res-card.m-esa{border-left-color:var(--orange);}
+    .res-card.m-sum{border-left-color:var(--purple);}
+    .res-inner{padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+    .res-score{font-family:'DM Sans',sans-serif;font-size:30px;font-weight:700;color:var(--g);min-width:64px;text-align:center;line-height:1;}
+    .res-score small{font-size:14px;color:var(--ink-m);}
+    .res-score.pend{font-size:15px;color:var(--orange);}
+    .res-info{flex:1;min-width:0;}
+    .res-badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700;margin-bottom:5px;}
+    .b-esa{background:#fff7ed;color:#b45309;}.b-jte{background:var(--g-lt);color:#1d4ed8;}
+    .b-etj{background:var(--blue-lt);color:#0369a1;}.b-sum{background:#faf5ff;color:#7c3aed;}
+    .res-topic{font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .res-date{font-size:12px;color:var(--ink-m);margin-top:3px;}
+    .res-arrow{color:var(--ink-m);font-size:20px;}
+    .bar-wrap{padding:0 20px 14px;}
+    .bar-bg{background:var(--s3);border-radius:99px;height:5px;overflow:hidden;}
+    .bar{height:100%;border-radius:99px;transition:width 1.2s cubic-bezier(.34,1.56,.64,1);}
+    .empty-state{text-align:center;padding:64px 20px;}
+    .empty-icon{font-size:52px;margin-bottom:14px;}
+    .empty-title{font-size:16px;font-weight:700;color:var(--ink-s);}
+    .empty-sub{font-size:13px;color:var(--ink-m);margin-top:6px;}
+    /* MODAL */
+    .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;overflow-y:auto;padding:16px;backdrop-filter:blur(3px);}
+    .overlay.on{display:block;}
+    .modal{background:var(--white);border-radius:18px;max-width:660px;margin:0 auto;padding:30px;box-shadow:var(--shadow-lg);}
+    .modal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+    .modal-h h2{font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;color:var(--ink);}
+    .modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--ink-m);padding:4px;border-radius:6px;}
+    .modal-close:hover{background:var(--s3);}
+    .score-big{font-family:'DM Sans',sans-serif;font-size:56px;font-weight:700;line-height:1;}
+    .score-max{font-size:20px;color:var(--ink-m);font-family:'DM Sans',sans-serif;}
+    .box-g{background:var(--g-lt);border-left:4px solid var(--g);padding:14px 16px;border-radius:var(--r-sm);margin-bottom:14px;font-size:14px;color:#1e3a5f;}
+    .box-gray{background:var(--s3);border-left:4px solid var(--border);padding:14px 16px;border-radius:var(--r-sm);margin-bottom:14px;font-size:13px;color:var(--ink-s);}
+    .box-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ink-m);margin-bottom:6px;}
+    .fb-card{border-radius:var(--r-sm);padding:16px;margin-bottom:12px;border:1px solid var(--border);border-left:4px solid var(--border);}
+    .fb-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;}
+    .fb-badge{margin-left:auto;background:var(--s3);color:var(--g);padding:2px 12px;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;border:1px solid var(--border);}
+    .fb-1{border-left-color:var(--g);}.fb-2{border-left-color:var(--orange);}.fb-3{border-left-color:var(--blue);}.fb-4{border-left-color:var(--purple);}
+    .fb-5{border-left-color:var(--red);background:#fef2f2;}
+    .fb-6{border-left-color:var(--g);background:var(--g-lt);text-align:center;}
+    .fb-6 .fb-title{justify-content:center;margin-bottom:4px;}
+    .fb-7{border-left-color:#22c55e;background:var(--g-lt);}
+    .fb-li{position:relative;padding-left:18px;margin-bottom:6px;font-size:13px;color:var(--ink-s);}
+    .fb-li::before{content:"›";position:absolute;left:4px;color:var(--g);font-weight:700;}
+    .modal p{font-size:13px;color:var(--ink-s);margin:5px 0;}
+    .spin{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--g);border-radius:50%;animation:sp 1s linear infinite;margin:44px auto;display:none;}
+    @keyframes sp{to{transform:rotate(360deg);}}
+    @media(max-width:480px){.s-card{padding:28px 20px;}.profile{flex-direction:column;text-align:center;}.prof-stats{justify-content:center;}}
+  </style>
+</head>
+<body>
+
+<!-- ===== 検索画面 ===== -->
+<div id="searchScreen" class="search-screen">
+  <div class="s-wrap">
+    <div class="s-logo">
+      <div class="s-logo-mark">📋</div>
+      <div class="s-logo-txt">池田山商店 AI鐘馗</div>
+    </div>
+    <div class="s-card">
+      <div class="s-title">採点結果を確認する</div>
+      <div class="s-sub">学校コードと生徒IDを入力してください</div>
+      <div class="field"><label>学校コード</label><input id="codeInp" type="text" placeholder="例: school01" autocomplete="off"></div>
+      <div class="field"><label>生徒ID</label><input id="idInp" type="text" placeholder="例: 20240001" autocomplete="off"></div>
+      <button class="btn btn-primary btn-block" id="searchBtn" onclick="doSearch()">🔍 採点結果を確認する</button>
+      <div class="err" id="searchErr">学校コードまたは生徒IDが正しくありません</div>
+      <p class="hint">※ 提出から採点完了まで数分かかる場合があります</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 結果画面 ===== -->
+<div id="resScreen" class="res-screen">
+  <div class="topbar">
+    <div class="topbar-title">📋 採点結果</div>
+    <span class="school-pill" id="schoolPill"></span>
+    <button class="btn btn-outline btn-sm" onclick="doBack()">← 戻る</button>
+  </div>
+  <div class="main">
+    <div class="profile" id="profile"></div>
+    <div class="spin" id="spin"></div>
+    <div id="resList"></div>
+  </div>
+</div>
+
+<!-- ===== 詳細モーダル ===== -->
+<div class="overlay" id="overlay" onclick="closeBg(event)">
+  <div class="modal">
+    <div class="modal-h">
+      <h2>🌿 採点結果詳細</h2>
+      <button class="modal-close" onclick="closeMo()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+/* ============================================================
+   ★★★ CONFIG — 以下を書き換えてください（teacher.htmlと同じ値）★★★
+   ============================================================ */
+const SUPABASE_URL = "https://bercsxnxdojltqatsuip.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJlcmNzeG54ZG9qbHRxYXRzdWlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MzY4MjYsImV4cCI6MjA5MDUxMjgyNn0.jOQJzs_MTfKmiIHTBsG54qOrNcfnp5sQI1j4SXGltao";
+/* ============================================================ */
+
+  const { createClient } = supabase;
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  function getSBH(token) {
+    return { apikey: SUPABASE_KEY, Authorization: "Bearer " + (token || SUPABASE_KEY) };
+  }
+  let SBH = getSBH(null);
+  let myData=[], currentSchoolName="";
+
+  async function doSearch(){
+    const code=document.getElementById('codeInp').value.trim();
+    const sid_input=document.getElementById('idInp').value.trim();
+    if(!code||!sid_input){alert("学校コードと生徒IDを入力してください");return;}
+
+    const btn=document.getElementById('searchBtn'),err=document.getElementById('searchErr');
+    btn.disabled=true;btn.textContent="確認中...";err.style.display="none";
+    try{
+      // ① Supabase Authでサインイン（小文字で統一）
+      const email = `${sid_input}@${code}.student`.toLowerCase();
+      const password = `${sid_input}-${code}`;
+      const { data: authData, error: authError } = await sb.auth.signInWithPassword({ email, password });
+
+      if(authError){
+        err.textContent="学校コードまたは生徒IDが正しくありません。先生に確認してください。";
+        err.style.display="block";
+        return;
+      }
+
+      // ② JWTトークンでSBHを更新（RLSが有効になり自分のデータだけ見える）
+      SBH = getSBH(authData.session.access_token);
+
+      // ③ 学校情報を取得
+      const sr=await fetch(`${SUPABASE_URL}/rest/v1/schools?code=eq.${encodeURIComponent(code)}&select=id,name`,{headers:SBH});
+      const schools=await sr.json();
+      if(!schools?.length){err.textContent="学校コードが正しくありません";err.style.display="block";return;}
+      const sid=schools[0].id;currentSchoolName=schools[0].name||code;
+
+      // ④ 自分のsubmissionsを取得（RLSで自動的に自分のデータだけ返る）
+      const url=`${SUPABASE_URL}/rest/v1/submissions?school_id=eq.${sid}&student_id=eq.${encodeURIComponent(sid_input)}&order=submitted_at.desc&limit=200`;
+      const dr=await fetch(url,{headers:SBH});
+      const data=await dr.json();
+      if(!data?.length){err.textContent="採点結果がまだありません。先生に確認してください。";err.style.display="block";return;}
+      myData=data;myData.forEach(r=>{r._sc=extractSc(r.feedback);r._max=extractMax(r.feedback);});
+      renderProfile();renderList();
+      document.getElementById('schoolPill').textContent="🏫 "+currentSchoolName;
+      document.getElementById('searchScreen').style.display="none";
+      document.getElementById('resScreen').style.display="block";
+    }catch(e){alert("通信エラー: "+e.message);}
+    finally{btn.disabled=false;btn.textContent="🔍 採点結果を確認する";}
+  }
+
+  async function doBack(){
+    await sb.auth.signOut();
+    SBH=getSBH(null);
+    document.getElementById('resScreen').style.display="none";
+    document.getElementById('searchScreen').style.display="flex";
+    myData=[];
+  }
+  document.getElementById('codeInp').addEventListener('keypress',e=>{if(e.key==='Enter')document.getElementById('idInp').focus();});
+  document.getElementById('idInp').addEventListener('keypress',e=>{if(e.key==='Enter')doSearch();});
+
+  function renderProfile(){
+    const r=myData[0];
+    const done=myData.filter(x=>x._sc!==null);
+    const avg=done.length?Math.round(done.reduce((a,x)=>a+x._sc,0)/done.length):'-';
+    const meta=[r.grade,r.class_name,r.seat_number?`出席番号 ${r.seat_number}`:''].filter(Boolean).join(' / ');
+    document.getElementById('profile').innerHTML=`
+      <div class="avatar">👨‍🎓</div>
+      <div class="prof-info">
+        <div class="prof-name">${esc(r.student_name||'')}</div>
+        <div class="prof-meta">${esc(meta)||'&nbsp;'}</div>
+      </div>
+      <div class="prof-stats">
+        <div class="pst"><div class="pst-n">${myData.length}</div><div class="pst-l">提出数</div></div>
+        <div class="pst"><div class="pst-n">${done.length}</div><div class="pst-l">採点済み</div></div>
+        <div class="pst"><div class="pst-n">${avg==='−'?'-':avg+(avg!=='-'?'点':'')}</div><div class="pst-l">平均点</div></div>
+      </div>`;
+  }
+
+  function renderList(){
+    const el=document.getElementById('resList');
+    if(!myData.length){el.innerHTML=`<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">採点結果がありません</div><div class="empty-sub">先生が採点すると、ここに表示されます</div></div>`;return;}
+    const mcls={'英作文':'m-esa','和文英訳':'m-jte','英文和訳':'m-etj','要約':'m-sum'};
+    const bcls={'英作文':'b-esa','和文英訳':'b-jte','英文和訳':'b-etj','要約':'b-sum'};
+    const barColor=(r)=>{if(!r._max)return'var(--g)';const p=r._sc/r._max;return p>=.8?'#2563eb':p>=.6?'var(--orange)':'var(--red)';};
+    el.innerHTML=myData.map((r,i)=>{
+      const isDone=r._sc!==null;
+      const topic=(r.topic||'').length>38?r.topic.slice(0,38)+'…':r.topic||'課題なし';
+      const pct=(isDone&&r._max)?Math.round(r._sc/r._max*100):0;
+      return `<div class="res-card ${mcls[r.translation_type]||''}" onclick="showDet(${i})">
+        <div class="res-inner">
+          ${isDone?`<div class="res-score">${r._sc}<small>点</small></div>`:'<div class="res-score pend">採点中</div>'}
+          <div class="res-info">
+            <div><span class="res-badge ${bcls[r.translation_type]||''}">${esc(r.translation_type||'')}</span></div>
+            <div class="res-topic">${esc(topic)}</div>
+            <div class="res-date">📅 ${fmtDt(r.submitted_at)}</div>
+          </div>
+          <div class="res-arrow">›</div>
+        </div>
+        ${isDone&&r._max?`<div class="bar-wrap"><div class="bar-bg"><div class="bar" style="width:${pct}%;background:${barColor(r)}"></div></div></div>`:''}
+      </div>`;
+    }).join('');
+  }
+
+  function showDet(i){
+    const r=myData[i];if(!r)return;
+    const tc={'英作文':'#b45309','和文英訳':'#1d4ed8','英文和訳':'#0369a1','要約':'#7c3aed'}[r.translation_type]||'#64748b';
+    const pct=(r._sc&&r._max)?Math.round(r._sc/r._max*100):0;
+    const barCol=r._max?(pct>=80?'#2563eb':pct>=60?'var(--orange)':'var(--red)'):'var(--g)';
+    let h=`<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px">
+      <span style="background:${tc};color:white;padding:4px 14px;border-radius:12px;font-size:13px;font-weight:700">${esc(r.translation_type||'')}</span>
+      <span style="background:var(--s3);border:1px solid var(--border);color:var(--ink-s);padding:4px 12px;border-radius:12px;font-size:12px">📅 ${fmtDt(r.submitted_at)}</span>
+    </div>`;
+    if(r._sc!==null){
+      h+=`<div style="text-align:center;padding:20px 0 16px">
+        <div class="score-big" style="color:${barCol}">${r._sc}<span class="score-max"> / ${r._max||'?'}点</span></div>
+        ${r._max?`<div style="background:var(--s3);border-radius:99px;height:10px;overflow:hidden;margin:14px 0 4px">
+          <div style="height:100%;width:${pct}%;background:${barCol};border-radius:99px;transition:width 1s ease"></div>
+        </div><div style="font-size:13px;color:var(--ink-m)">${pct}%</div>`:''}
+      </div>`;
+    }
+    h+=`<div class="box-g">📄 <strong>課題：</strong>${esc(r.topic||'').replace(/\n/g,'<br>')}</div>`;
+    if(r.answer)h+=`<div class="box-gray"><div class="box-lbl">✏️ 提出した解答</div>${esc(r.answer||'').replace(/\n/g,'<br>')}</div>`;
+    h+=(r.feedback&&r.status==='done')?parseFb(r.feedback):`<div style="text-align:center;padding:32px;color:var(--orange);font-size:16px">⏳ 採点中です<br><span style="font-size:13px;color:var(--ink-m)">しばらく待ってから再度確認してください</span></div>`;
+
+    // 先生からのコメントがあれば表示
+    if(r.teacher_comment && r.teacher_comment.trim()){
+      h+=`<div style="margin-top:14px;border-radius:8px;border:2px solid var(--g);padding:16px;background:var(--g-lt)">
+        <div style="font-size:13px;font-weight:700;color:var(--g);margin-bottom:8px">✍️ 先生からのコメント</div>
+        <div style="font-size:14px;color:var(--ink);line-height:1.8;white-space:pre-wrap">${esc(r.teacher_comment)}</div>
+      </div>`;
+    }
+    document.getElementById('modalBody').innerHTML=h;
+    document.getElementById('overlay').classList.add('on');
+    setTimeout(()=>{document.querySelectorAll('.bar').forEach(b=>{const w=b.style.width;b.style.width='0%';requestAnimationFrame(()=>requestAnimationFrame(()=>b.style.width=w));});},100);
+  }
+  function closeMo(){document.getElementById('overlay').classList.remove('on');}
+  function closeBg(e){if(e.target===document.getElementById('overlay'))closeMo();}
+
+  function parseFb(text){
+    if(!text)return'<p>なし</p>';
+    let h='',open=false;
+    for(let line of text.split('\n')){
+      line=line.trim();if(!line)continue;const e_=esc(line);
+      if(line.startsWith('## ')){
+        if(open)h+='</div>';open=true;
+        if(line.includes('1. 意味'))h+=`<div class="fb-card fb-1"><div class="fb-title">🎯 意味の正確さ <span class="fb-badge">${e_.split(':').slice(1).join(':').trim()}</span></div>`;
+        else if(line.includes('2. 文法'))h+=`<div class="fb-card fb-2"><div class="fb-title">📖 文法・正確性 <span class="fb-badge">${e_.split(':').slice(1).join(':').trim()}</span></div>`;
+        else if(line.includes('3. 語彙'))h+=`<div class="fb-card fb-3"><div class="fb-title">📚 語彙の適切さ <span class="fb-badge">${e_.split(':').slice(1).join(':').trim()}</span></div>`;
+        else if(line.includes('4. 自然'))h+=`<div class="fb-card fb-4"><div class="fb-title">🌿 自然な表現 <span class="fb-badge">${e_.split(':').slice(1).join(':').trim()}</span></div>`;
+        else if(line.includes('5. '))h+=`<div class="fb-card fb-5"><div class="fb-title">🛠️ 訂正ポイント</div>`;
+        else if(line.includes('6. '))h+=`<div class="fb-card fb-6"><div class="fb-title">🏆 総合評価</div>`;
+        else if(line.includes('7. '))h+=`<div class="fb-card fb-7"><div class="fb-title">✨ 改善例文</div>`;
+        else h+=`<div class="fb-card"><div class="fb-title">${e_.slice(3)}</div>`;
+      }else if(line.startsWith('- ')){h+=`<div class="fb-li">${e_.slice(2)}</div>`;}
+      else h+=`<p>${e_}</p>`;
+    }
+    if(open)h+='</div>';return h;
+  }
+
+  function extractSc(fb){if(!fb)return null;const m=fb.match(/合計\((\d+)\//);return m?parseInt(m[1]):null;}
+  function extractMax(fb){if(!fb)return null;const m=fb.match(/合計\(\d+\/(\d+)点\)/);return m?parseInt(m[1]):null;}
+  function fmtDt(s){if(!s)return'';const d=new Date(s);return`${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;}
+  function esc(s){if(!s)return'';return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+</script>
+</body>
+</html>
